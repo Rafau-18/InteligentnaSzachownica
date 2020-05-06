@@ -1,7 +1,7 @@
 #include <Arduino.h>
-
+///github test 
 //#include "WiFi.h"
-
+/////--------------
 //arduino----------------------
 //int tab_out[8]={2,3,4,5,6,7,8,9};
 //int tab_read[8]={10,11,12,13,14,15,16,17};
@@ -56,6 +56,7 @@ void initialize(){
     digitalWrite(tab_out[7],HIGH);    
     delay(1500);
     Serial.println("Setup done");
+    Serial.println("Ustaw pionki");
 }
 
 void odczyt(){
