@@ -1,17 +1,9 @@
 #include <Arduino.h>
-///github test 
-//#include "WiFi.h"
-/////--------------
-//arduino----------------------
-//int tab_out[8]={2,3,4,5,6,7,8,9};
-//int tab_read[8]={10,11,12,13,14,15,16,17};
-//esp32------------
+
+// Piny wejściowe i wyjsciowe macierzy 8x8 dla szachownicy 
 int tab_out[8]={13,12,14,27,26,25,33,32};
 int tab_read[8]={15,22,4,16,17,5,18,19};
 //----------------
-bool last[3][3]={{1,1,1},{1,1,1},{1,1,1}};
-bool roznica=0;
-bool temp[3][3]={{0,0,0},{0,0,0},{0,0,0}};
 
 void setup() {
   
@@ -56,7 +48,7 @@ void initialize(){
     digitalWrite(tab_out[7],HIGH);    
     delay(1500);
     Serial.println("Setup done");
-    Serial.println("Ustaw pionki");
+    
 }
 
 void odczyt(){
