@@ -5,6 +5,7 @@ int tab_out[8]={13,12,14,27,26,25,33,32};
 int tab_read[8]={15,22,4,16,17,5,18,19};
 void odczyt();
 void initialize();
+void wypisz();
 
 const char* TablicaPozycji[8][8]={{"A1","A2","A3","A4","A5","A6","A7","A8"},
                                   {"B1","B2","B3","B4","B5","B6","B7","B8"},
@@ -20,6 +21,7 @@ int PreviousState[8][8]; //Tablica z poprzednim odczytem
 int state[8][8]; // aktualnie odcztywany stan do porównania z poprzednim z tablicy
 int reading[8][8]; // 
 
+unsigned long timer = 10; 
 unsigned long debounceDelay = 15; 
 unsigned long lastDebounceTime[8][8];// czas debouncingu na odczycie kontaktronu 
 
@@ -33,7 +35,16 @@ void setup() {
 void loop() {
 
  odczyt();
- delay(500);
+ if(millis()-timer>9000)
+ {
+   wypisz();
+   Serial.println();
+   Serial.println();
+   Serial.println();
+   Serial.println();
+   timer=millis();
+ }
+ 
 
 }
 
@@ -116,7 +127,33 @@ void odczyt(){
       PreviousState[i][j]=reading[i][j]; // zapisz odczyt jako stan poprzedni        
     }
         
-    digitalWrite(tab_out[i],LOW); // ustawienie kolumny w stanie niskim do odczytu
+    digitalWrite(tab_out[i],HIGH); // ustawienie kolumny w stanie niskim do odczytu
   }
 }
 
+void wypisz()
+{
+  for(int i =0; i<8 ; i++)
+  {
+    if(i==0)
+    {
+        Serial.println("________________");
+    }
+    
+    
+    for(int j =0; j<8 ; j++)
+    {
+      Serial.print(state[i][j]);Serial.print("|");
+    }
+    if(i==7)
+    {
+        Serial.println("________________");
+    }
+    else
+    {
+      Serial.println();
+    }
+    
+
+  }
+}
