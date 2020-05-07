@@ -7,14 +7,14 @@ void odczyt();
 void initialize();
 void wypisz();
 
-const char* TablicaPozycji[8][8]={{"A1","A2","A3","A4","A5","A6","A7","A8"},
-                                  {"B1","B2","B3","B4","B5","B6","B7","B8"},
-                                  {"C1","C2","C3","C4","C5","C6","C7","C8"},
-                                  {"D1","D2","D3","D4","D5","D6","D7","D8"},
-                                  {"E1","E2","E3","E4","E5","E6","E7","E8"},
-                                  {"F1","F2","F3","F4","F5","F6","F7","F8"},
-                                  {"G1","G2","G3","G4","G5","G6","G7","G8"},
-                                  {"H1","H2","H3","H4","H5","H6","H7","H8"},
+const char* TablicaPozycji[8][8]={{"A1","B1","C1","D1","E1","F1","G1","H1"},
+                                  {"A2","B2","C2","D2","E2","F2","G2","H2"},
+                                  {"A3","B3","C3","D3","E3","F3","G3","H3"},
+                                  {"A4","B4","C4","D4","E4","F4","G4","H4"},
+                                  {"A5","B5","C5","D5","E5","F5","G5","H5"},
+                                  {"A6","B6","C6","D6","E6","F6","G6","H6"},
+                                  {"A7","B7","C7","D7","E7","F7","G7","H7"},
+                                  {"A8","B8","C8","D8","E8","F8","G8","H8"},                                                         
                                  };
 
 int PreviousState[8][8]; //Tablica z poprzednim odczytem
@@ -22,7 +22,7 @@ int state[8][8]; // aktualnie odcztywany stan do porównania z poprzednim z tabl
 int reading[8][8]; // 
 
 unsigned long timer = 10; 
-unsigned long debounceDelay = 15; 
+unsigned long debounceDelay = 50; 
 unsigned long lastDebounceTime[8][8];// czas debouncingu na odczycie kontaktronu 
 
 
@@ -37,12 +37,12 @@ void loop() {
  odczyt();
  if(millis()-timer>9000)
  {
-   wypisz();
-   Serial.println();
-   Serial.println();
-   Serial.println();
-   Serial.println();
-   timer=millis();
+   //wypisz();
+   //Serial.println();
+  // Serial.println();
+  // Serial.println();
+  // Serial.println();
+  // timer=millis();
  }
  
 
@@ -108,26 +108,32 @@ void odczyt(){
       if(PreviousState[i][j] != reading[i][j])
       {
         lastDebounceTime[i][j]=millis();
-        Serial.print("Reset"); Serial.println(TablicaPozycji[i][j]); Serial.println(reading[i][j]);  // resetuj timer debouncera     
+       // Serial.print("Reset"); Serial.println(TablicaPozycji[i][j]); Serial.println(reading[i][j]);  // resetuj timer debouncera     
       }
       if( ( millis()-lastDebounceTime[i][j] ) > debounceDelay)
       {
         if(reading[i][j]!=state[i][j])
-
+        {
           state[i][j]=reading[i][j] ;// zapisz odczyt jako aktualny stan 
 
           if(state[i][j]==0){
-           // Serial.println("Postawiono figurę na pozycji: " ); Serial.println(TablicaPozycji[i][j]);
-          } else
+            Serial.println("Postawiono figurę na pozycji: " ); Serial.println(TablicaPozycji[i][j]);
+          } 
+          else
           {
-            // Serial.println("Podniesiono figurę z pozycji: " ); Serial.println(TablicaPozycji[i][j]);
+             Serial.println("Podniesiono figurę z pozycji: " ); Serial.println(TablicaPozycji[i][j]);
           }
+          wypisz();
+        }
+
+          
           
       } 
       PreviousState[i][j]=reading[i][j]; // zapisz odczyt jako stan poprzedni        
     }
         
-    digitalWrite(tab_out[i],HIGH); // ustawienie kolumny w stanie niskim do odczytu
+    digitalWrite(tab_out[i],HIGH);
+    delay(5); // ustawienie kolumny w stanie niskim do odczytu
   }
 }
 
@@ -137,22 +143,42 @@ void wypisz()
   {
     if(i==0)
     {
-        Serial.println("________________");
+        
+        Serial.println();
+        Serial.println("__________________");           
     }
-    
-    
     for(int j =0; j<8 ; j++)
     {
-      Serial.print(state[i][j]);Serial.print("|");
+      if(state[i][j])
+      {
+        if(j==0)
+        {
+          Serial.print(i+1);Serial.print("|");
+        }
+        Serial.print(" ");Serial.print("|");
+        
+      }
+      else{
+          if(j==0)
+        {
+          Serial.print(i+1);Serial.print("|");
+        }
+        Serial.print("O");Serial.print("|");
+      }
+      
     }
     if(i==7)
     {
-        Serial.println("________________");
+        Serial.println();
+        //Serial.println("________________");
+        Serial.println("  A B C D E F G H ");   
+        Serial.println();
     }
     else
     {
       Serial.println();
     }
+    
     
 
   }
