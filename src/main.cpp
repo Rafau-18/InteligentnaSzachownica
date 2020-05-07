@@ -2,7 +2,8 @@
 
 // Piny wejściowe i wyjsciowe macierzy 8x8 dla szachownicy 
 int tab_out[8]={13,12,14,27,26,25,33,32};
-int tab_read[8]={15,22,4,16,17,5,18,19};
+//int tab_read[8]={15,22,4,16,17,5,18,19};
+int tab_read[8]={19,18,5,17,16,4,22,15};
 void odczyt();
 void initialize();
 void wypisz();
@@ -22,7 +23,7 @@ int state[8][8]; // aktualnie odcztywany stan do porównania z poprzednim z tabl
 int reading[8][8]; // 
 
 unsigned long timer = 10; 
-unsigned long debounceDelay = 50; 
+unsigned long debounceDelay = 75; 
 unsigned long lastDebounceTime[8][8];// czas debouncingu na odczycie kontaktronu 
 
 
