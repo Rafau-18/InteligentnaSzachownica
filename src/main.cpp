@@ -2,12 +2,24 @@
 
 #include <WiFi.h>
 #include <FirebaseESP32.h>
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 //1. Change the following info
 #define FIREBASE_HOST "chessboard-iot2020.firebaseio.com"
 #define FIREBASE_AUTH "whgvLkMDEeQ7ej6ur0ZBSfB1Mgx8a1vc13HbRRxZ"
 #define WIFI_SSID "Orange_Swiatlowod_09E0"
 #define WIFI_PASSWORD "GQKH6GTEKWLC"
+hw_timer_t * timer1 = NULL;
+
+#define OLED_RESET -1 // LED_BUILTIN  
+Adafruit_SSD1306 display1(128, 64, &Wire, OLED_RESET);
+#define XPOS 0
+#define YPOS 1
+#define DELTAY 2
+int WhiteTime = 300;
 
 //const char* password =  "GQKH6GTEKWLC";
 
@@ -22,6 +34,7 @@ int tab_read[8]={13,12,14,27,26,25,33,34};
 void odczyt();
 void initialize();
 void wypisz();
+void wyswietlacz();
 
 const String TablicaPozycji[8][8]={{"A1","B1","C1","D1","E1","F1","G1","H1"},
                                   {"A2","B2","C2","D2","E2","F2","G2","H2"},
@@ -56,26 +69,48 @@ unsigned long timer = 10;
 unsigned long debounceDelay = 75; 
 unsigned long lastDebounceTime[8][8];// czas debouncingu na odczycie kontaktronu 
 FirebaseData standane;
+bool aktualizuj=0;
+
+void IRAM_ATTR onTimer(){
+
+ //wyswietlacz();
+  Serial.println(String(millis()));
+  WhiteTime-=1;
+  aktualizuj=1;
+ // turn the LED on or off
+}
 
 void setup() {
   
     initialize();
+
+    display1.begin(SSD1306_SWITCHCAPVCC, 0x3D);  // display 1 address 0x3C
+    display1.clearDisplay(); 
+  display1.setTextColor(WHITE, BLACK);
+    display1.setTextSize(2);
+    display1.println("Setup is OK");
+    display1.display();
+    //display1.clearDisplay();
+    //display1.display();
+    delay(1000);
+ 
+
+     Serial.println("start timer ");
+  timer1 = timerBegin(0, 80, true);  // timer 0, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
+  timerAttachInterrupt(timer1, &onTimer, true); // edge (not level) triggered 
+  timerAlarmWrite(timer1, 1000000, true); // 1000000 * 1 us = 1 s, autoreload true
+  timerAlarmEnable(timer1);
     
 }
 
 void loop() {
-
+  if(aktualizuj)
+  {
+    wyswietlacz();
+    aktualizuj=0;
+  }
+ //wyswietlacz();
  odczyt();
- if(millis()-timer>9000)
- {
-   //wypisz();
-   //Serial.println();
-  // Serial.println();
-  // Serial.println();
-  // Serial.println();
-  // timer=millis();
- }
- 
 
 }
 
@@ -125,7 +160,7 @@ void initialize(){
   //4. Enable auto reconnect the WiFi when connection lost
       Firebase.reconnectWiFi(true);
 
-    delay(4500);
+    delay(1000);
 
 
     Serial.println("Setup done");
@@ -179,6 +214,9 @@ void odczyt(){
 
           if(state[i][j]==0){
             Serial.println("Postawiono figurę na pozycji: " ); Serial.println(TablicaPozycji[i][j]);
+            display1.clearDisplay();
+            display1.print(String(millis()));
+            timerAlarmEnable(timer1);
             Firebase.setBool(standane, "Status/"+ TablicaPozycji[i][j],1);
             if(i==0 && j==0)
             {
@@ -188,9 +226,10 @@ void odczyt(){
           else
           {
              Serial.println("Podniesiono figurę z pozycji: " ); Serial.println(TablicaPozycji[i][j]);
+             timerAlarmDisable(timer1);
             Firebase.setBool(standane, "Status/"+ TablicaPozycji[i][j], 0);
           }
-          wypisz();
+         // wypisz();
         }          
           
       } 
@@ -247,4 +286,15 @@ void wypisz()
     
 
   }
+}
+
+
+void wyswietlacz(){
+    display1.clearDisplay(); 
+    display1.setCursor(0,0);
+    display1.setTextColor(WHITE, BLACK);
+    display1.setTextSize(2);
+    display1.print(WhiteTime);
+    display1.display();
+
 }
