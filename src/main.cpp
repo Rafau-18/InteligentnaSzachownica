@@ -16,10 +16,22 @@ hw_timer_t * timer1 = NULL;
 
 #define OLED_RESET -1 // LED_BUILTIN  
 Adafruit_SSD1306 display1(128, 64, &Wire, OLED_RESET);
+Adafruit_SSD1306 display2(128, 64, &Wire, OLED_RESET);
 #define XPOS 0
 #define YPOS 1
 #define DELTAY 2
 int WhiteTime = 300;
+int BlackTime = 300;
+int W_Minute1;
+int W_Minute2;
+int W_Second1;
+int W_Second2;
+int B_Minute1;
+int B_Minute2;
+int B_Second1;
+int B_Second2;
+
+
 
 //const char* password =  "GQKH6GTEKWLC";
 
@@ -34,7 +46,8 @@ int tab_read[8]={13,12,14,27,26,25,33,34};
 void odczyt();
 void initialize();
 void wypisz();
-void wyswietlacz();
+void Whitedisplay();
+void Blackdisplay();
 
 const String TablicaPozycji[8][8]={{"A1","B1","C1","D1","E1","F1","G1","H1"},
                                   {"A2","B2","C2","D2","E2","F2","G2","H2"},
@@ -69,29 +82,40 @@ unsigned long timer = 10;
 unsigned long debounceDelay = 75; 
 unsigned long lastDebounceTime[8][8];// czas debouncingu na odczycie kontaktronu 
 FirebaseData standane;
-bool aktualizuj=0;
+bool WhiteDisplayUpdate=0;
+bool BlackDisplayUpdate=0;
 
 void IRAM_ATTR onTimer(){
-
- //wyswietlacz();
-  Serial.println(String(millis()));
   WhiteTime-=1;
-  aktualizuj=1;
- // turn the LED on or off
+  WhiteDisplayUpdate=1; 
 }
 
 void setup() {
   
-    initialize();
+    initialize();  
+
+   
+
+    display2.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // display 1 address 0x3C
+    display2.clearDisplay(); 
+    display2.display();
+    display2.clearDisplay(); 
+    display2.setCursor(0,0);
+    display2.setTextColor(WHITE, BLACK);
+    display2.setTextSize(2);
+    display2.println("Setup is OK");
+    display2.display();
 
     display1.begin(SSD1306_SWITCHCAPVCC, 0x3D);  // display 1 address 0x3C
     display1.clearDisplay(); 
-  display1.setTextColor(WHITE, BLACK);
+    display1.display();
+    display1.clearDisplay(); 
+    display1.setCursor(0,0);
+    display1.setTextColor(WHITE, BLACK);
     display1.setTextSize(2);
     display1.println("Setup is OK");
     display1.display();
-    //display1.clearDisplay();
-    //display1.display();
+ 
     delay(1000);
  
 
@@ -104,12 +128,13 @@ void setup() {
 }
 
 void loop() {
-  if(aktualizuj)
+  if(WhiteDisplayUpdate)
   {
-    wyswietlacz();
-    aktualizuj=0;
+    Whitedisplay();
+    WhiteDisplayUpdate=0;
   }
- //wyswietlacz();
+
+ //Whitedisplay();
  odczyt();
 
 }
@@ -177,11 +202,11 @@ void initialize(){
         PreviousState[i][j]=reading[i][j];
         if(digitalRead(tab_read[j]))
         {
-          Firebase.setBool(standane, "Status/"+ TablicaPozycji[i][j], 0);
+          //Firebase.setBool(standane, "Status/"+ TablicaPozycji[i][j], 0);
         }
         else
         {
-          Firebase.setBool(standane, "Status/"+ TablicaPozycji[i][j], 1);
+         // Firebase.setBool(standane, "Status/"+ TablicaPozycji[i][j], 1);
         }
       }
 
@@ -213,9 +238,7 @@ void odczyt(){
           state[i][j]=reading[i][j] ;// zapisz odczyt jako aktualny stan 
 
           if(state[i][j]==0){
-            Serial.println("Postawiono figurę na pozycji: " ); Serial.println(TablicaPozycji[i][j]);
-            display1.clearDisplay();
-            display1.print(String(millis()));
+            Serial.println("Postawiono figurę na pozycji: " ); Serial.println(TablicaPozycji[i][j]);            
             timerAlarmEnable(timer1);
             Firebase.setBool(standane, "Status/"+ TablicaPozycji[i][j],1);
             if(i==0 && j==0)
@@ -289,12 +312,39 @@ void wypisz()
 }
 
 
-void wyswietlacz(){
+void Whitedisplay(){
+
+
+    W_Minute1 = (WhiteTime / 60) / 10;
+    W_Minute2 = WhiteTime / 60 - W_Minute1 * 10;
+    W_Second1 = (WhiteTime - 60 * (W_Minute1 * 10 + W_Minute2)) / 10;
+    W_Second2 = WhiteTime - 60 * (W_Minute1 * 10 + W_Minute2) - 10 * W_Second1;
+
+    
     display1.clearDisplay(); 
-    display1.setCursor(0,0);
-    display1.setTextColor(WHITE, BLACK);
     display1.setTextSize(2);
-    display1.print(WhiteTime);
+    display1.setCursor(40,0);
+    display1.println(String("WHITE"));    
+    display1.setCursor(20,35);    
+    display1.setTextSize(3);
+    display1.println(String(W_Minute1)+String(W_Minute2)+String(":")+String(W_Second1)+String(W_Second2));
     display1.display();
+
+}
+
+void Blackdisplay(){
+
+    B_Minute1 = (BlackTime / 60) / 10;
+    B_Minute2 = BlackTime / 60 - B_Minute1 * 10;
+    B_Second1 = (BlackTime - 60 * (B_Minute1 * 10 + B_Minute2)) / 10;
+    B_Second2 = BlackTime - 60 * (B_Minute1 * 10 + B_Minute2) - 10 * B_Second1;
+
+    
+    display2.clearDisplay(); 
+    display2.setCursor(0,0);
+    display2.setTextColor(WHITE, BLACK);
+    display2.setTextSize(2);
+    display2.println(String(B_Minute1)+String(B_Minute2)+String(":")+String(B_Second1)+String(B_Second2));
+    display2.display();
 
 }
