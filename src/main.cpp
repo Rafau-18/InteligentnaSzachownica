@@ -9,6 +9,7 @@
 #include <Button.h>
 #include <Fonts/FreeMono9pt7b.h>
 #include <Fonts/Org_01.h>
+#include <ctype.h>
 
 
 
@@ -271,7 +272,15 @@ void loop() {
         
       }
   }
-  else WaitForStartPosition();
+  else 
+  {
+    WaitForStartPosition();
+    if(ButtonWhite.released())
+    {
+      wypisz();
+    }
+
+  }  
   
 
 }
@@ -385,6 +394,14 @@ void odczyt(){
               tmpCord[0]=i;
               tmpCord[1]=j;
               PutPiece(tmpCord, moved_piece);
+              if (TurnBlack)
+              {
+                Blackdisplay();
+              }else
+              {
+                Whitedisplay();
+              }
+              
             }
             
             Serial.println("Liczba figur"+String(PieceCount));  
@@ -402,6 +419,13 @@ void odczyt(){
              tmpCord[0]=i;
              tmpCord[1]=j;
              TakePiece(tmpCord, CurrentPieceState[i][j]);
+             if (TurnBlack)
+              {
+                Blackdisplay();
+              }else
+              {
+                Whitedisplay();
+              }
             }
            
             Serial.println("Podniesiono figurę z pozycji: " ); Serial.println(TablicaPozycji[i][j]);
@@ -616,26 +640,26 @@ void Whitedisplay(){
     display1.setTextSize(2);
     display1.setCursor(40,0);
     display1.println(String("WHITE"));
-    if(piece_taken)
+     if(piece_taken)
     {
-      display1.setTextSize(1);
+      display1.setTextSize(2);
       display1.setCursor(40,20); 
       display1.println(String(moved_piece));
     }else if(moved_piece && move_with_capture )
     {
-      display1.setTextSize(1);
+      display1.setTextSize(2);
       display1.setCursor(40,20); 
       display1.println(String(moved_piece)+String("x")+String(TablicaPozycji[move_to[1]][move_to[1]] ));
     }
     else if (move_done )
     {
-      display1.setTextSize(1);
+      display1.setTextSize(2);
       display1.setCursor(40,20); 
       display1.println(String(moved_piece)+String("->")+String(TablicaPozycji[move_to[1]][move_to[1]] ));
-    }
+    } 
     
        
-    display1.setCursor(20,35);    
+    display1.setCursor(20,40);    
     display1.setTextSize(3);
     display1.println(String(W_Minute1)+String(W_Minute2)+String(":")+String(W_Second1)+String(W_Second2));
     display1.display();
@@ -652,8 +676,25 @@ void Blackdisplay(){
     display2.clearDisplay(); 
     display2.setTextSize(2);
     display2.setCursor(40,0);
-    display2.println(String("BLACK"));    
-    display2.setCursor(20,40);        
+    display2.println(String("BLACK"));
+    if(piece_taken)
+    {
+      display2.setTextSize(2);
+      display2.setCursor(40,20); 
+      display2.println(String(moved_piece));
+    }else if(moved_piece && move_with_capture )
+    {
+      display2.setTextSize(2);
+      display2.setCursor(40,20); 
+      display2.println(String(moved_piece)+String("x")+String(TablicaPozycji[move_to[1]][move_to[1]] ));
+    }
+    else if (move_done )
+    {
+      display2.setTextSize(2);
+      display2.setCursor(40,20); 
+      display2.println(String(moved_piece)+String("->")+String(TablicaPozycji[move_to[1]][move_to[1]] ));
+    }    
+    display2.setCursor(20,41);        
     display2.setTextSize(3);   
     display2.println(String(B_Minute1)+String(B_Minute2)+String(":")+String(B_Second1)+String(B_Second2));
     display2.display();
